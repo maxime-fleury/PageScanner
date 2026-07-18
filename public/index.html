@@ -13,7 +13,7 @@
   <nav class="navbar navbar-expand-lg border-bottom border-secondary">
     <div class="container">
       <a class="navbar-brand fw-bold" href="/">
-        <i class="bi bi-crosshair-2 text-success me-2"></i>PageScanner
+        <i class="bi bi-crosshair-2 text-accent me-2"></i>PageScanner
       </a>
       <div class="navbar-nav ms-auto">
         <a class="nav-link active" href="/">Dashboard</a>
@@ -33,7 +33,7 @@
     <!-- Top bar: Control + Stats -->
     <div class="row g-3 mb-4 align-items-stretch">
       <div class="col-md-3">
-        <div class="card bg-dark border-secondary h-100">
+        <div class="card bg-dark border-secondary h-100 control-card">
           <div class="card-body d-flex flex-column justify-content-center align-items-center">
             <div id="crawler-icon" class="mb-2 text-secondary"><i class="bi bi-radar fs-1"></i></div>
             <h6 class="text-muted mb-2">Crawler</h6>
@@ -45,7 +45,7 @@
         </div>
       </div>
       <div class="col-md-3">
-        <div class="card bg-dark border-secondary h-100">
+        <div class="card bg-dark border-secondary h-100 control-card">
           <div class="card-body d-flex flex-column justify-content-center align-items-center">
             <div id="ss-icon" class="mb-2 text-secondary"><i class="bi bi-camera fs-1"></i></div>
             <h6 class="text-muted mb-2">Screenshotter</h6>
@@ -72,38 +72,38 @@
         </div>
       </div>
       <div class="col-md-2">
-        <div class="card bg-dark border-secondary h-100">
+        <div class="card bg-dark border-secondary h-100 stat-card total">
           <div class="card-body text-center d-flex flex-column justify-content-center">
-            <div class="text-success mb-1"><i class="bi bi-hdd-stack"></i></div>
+            <div class="stat-icon mb-1" style="color: var(--accent)"><i class="bi bi-hdd-stack"></i></div>
             <h6 class="text-muted mb-1" style="font-size:0.75rem">Total</h6>
-            <h3 id="stat-total" class="mb-0 font-mono">0</h3>
+            <h3 id="stat-total" class="mb-0 stat-number">0</h3>
           </div>
         </div>
       </div>
       <div class="col-md-2">
-        <div class="card bg-dark border-secondary h-100">
+        <div class="card bg-dark border-secondary h-100 stat-card screenshotted">
           <div class="card-body text-center d-flex flex-column justify-content-center">
-            <div class="text-info mb-1"><i class="bi bi-camera"></i></div>
+            <div class="stat-icon mb-1 text-info"><i class="bi bi-camera"></i></div>
             <h6 class="text-muted mb-1" style="font-size:0.75rem">Screenshotted</h6>
-            <h3 id="stat-screenshotted" class="mb-0 font-mono">0</h3>
+            <h3 id="stat-screenshotted" class="mb-0 stat-number">0</h3>
           </div>
         </div>
       </div>
       <div class="col-md-1">
-        <div class="card bg-dark border-secondary h-100">
+        <div class="card bg-dark border-secondary h-100 stat-card pending">
           <div class="card-body text-center d-flex flex-column justify-content-center">
-            <div class="text-warning mb-1"><i class="bi bi-hourglass-split"></i></div>
+            <div class="stat-icon mb-1 text-warning"><i class="bi bi-hourglass-split"></i></div>
             <h6 class="text-muted mb-1" style="font-size:0.75rem">Pending</h6>
-            <h3 id="stat-pending" class="mb-0 font-mono">0</h3>
+            <h3 id="stat-pending" class="mb-0 stat-number">0</h3>
           </div>
         </div>
       </div>
       <div class="col-md-1">
-        <div class="card bg-dark border-secondary h-100">
+        <div class="card bg-dark border-secondary h-100 stat-card blocked">
           <div class="card-body text-center d-flex flex-column justify-content-center">
-            <div class="text-danger mb-1"><i class="bi bi-shield-slash"></i></div>
+            <div class="stat-icon mb-1 text-danger"><i class="bi bi-shield-slash"></i></div>
             <h6 class="text-muted mb-1" style="font-size:0.75rem">Blocked</h6>
-            <h3 id="stat-blacklisted" class="mb-0 font-mono">0</h3>
+            <h3 id="stat-blacklisted" class="mb-0 stat-number">0</h3>
           </div>
         </div>
       </div>
@@ -114,7 +114,7 @@
       <div class="card-body py-2 px-3">
         <div class="d-flex justify-content-between align-items-center mb-1">
           <h6 class="text-muted mb-0" style="font-size:0.8rem">Discoveries over time</h6>
-          <span id="live-counter" class="badge bg-success" style="display:none;font-size:0.7rem">
+          <span id="live-counter" class="badge bg-accent" style="display:none;font-size:0.7rem">
             <i class="bi bi-broadcast"></i> LIVE
           </span>
         </div>

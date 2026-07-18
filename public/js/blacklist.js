@@ -54,7 +54,7 @@ async function loadBlacklistedDomains() {
         <div class="d-flex align-items-center gap-3">
           ${d.screenshot_path
             ? `<img src="${d.screenshot_path}" style="width:60px;height:40px;object-fit:cover;border-radius:4px;">`
-            : `<div style="width:60px;height:40px;background:#222;border-radius:4px;" class="d-flex align-items-center justify-content-center">
+            : `<div style="width:60px;height:40px;background:var(--bg-card, #16102e);border-radius:4px;" class="d-flex align-items-center justify-content-center">
                 <i class="bi bi-image text-muted small"></i>
               </div>`
           }

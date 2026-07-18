@@ -49,14 +49,14 @@ function renderCard(d) {
   const hasShot = d.screenshot_path && d.screenshot_path !== "";
   const imgHtml = hasShot
     ? `<img src="${d.screenshot_path}" alt="${escHtml(d.domain)}" loading="lazy">`
-    : `<div class="d-flex align-items-center justify-content-center" style="height:200px;background:#1a1a2e">
+    : `<div class="d-flex align-items-center justify-content-center" style="height:200px;background:var(--bg-card, #16102e)">
         <i class="bi bi-hourglass-split text-muted fs-2"></i>
       </div>`;
 
   const blBadge = d.blacklisted ? '<span class="position-absolute top-0 end-0 badge bg-danger m-2" style="font-size:0.65rem"><i class="bi bi-shield-x"></i></span>' : '';
 
   col.innerHTML = `
-    <div class="card bg-dark border-secondary gallery-card ${d.blacklisted ? 'blacklisted' : ''}" data-id="${d.id}">
+    <div class="card gallery-card ${d.blacklisted ? 'blacklisted' : ''}" data-id="${d.id}">
       <div class="position-relative">
         ${imgHtml}
         ${blBadge}
