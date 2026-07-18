@@ -123,7 +123,6 @@ async function pollLog(log) {
       return;
     }
     const data = await entriesResp.json();
-    checkpoints[log.url] = start + batchSize;
 
     const domains = parseEntries(data.entries);
     let newCount = 0;
@@ -144,6 +143,9 @@ async function pollLog(log) {
         queueScreenshot(newDomain, ioRef);
       }
     }
+
+    // Update checkpoint only AFTER successful processing
+    checkpoints[log.url] = start + batchSize;
 
     if (newCount > 0) {
       console.log(`[CT] ${log.name}: +${newCount} domains (tree: ${treeSize})`);

@@ -25,6 +25,7 @@ function debounceRefresh() {
     refreshTimer = null;
     loadDomains();
     loadStats();
+    loadChart();
   }, 1000);
 }
 

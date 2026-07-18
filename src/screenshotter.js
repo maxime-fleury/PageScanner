@@ -77,9 +77,15 @@ async function initBrowsers() {
 }
 
 function acquirePage() {
-  for (const entry of pagePool) {
+  for (let i = 0; i < pagePool.length; i++) {
+    const entry = pagePool[i];
     if (!entry.busy) {
       try { entry.browser.process(); } catch {
+        // Browser crashed, remove its pages from pool
+        pagePool = pagePool.filter((e) => e.browser !== entry.browser);
+        browsers = browsers.filter((b) => b !== entry.browser);
+        console.log(`[SS] Removed crashed browser, ${browsers.length} remaining`);
+        i--;
         continue;
       }
       entry.busy = true;
@@ -104,7 +110,8 @@ async function replacePage(entry) {
   } catch {
     const bi = browsers.indexOf(entry.browser);
     if (bi !== -1) browsers.splice(bi, 1);
-    pagePool.splice(pagePool.indexOf(entry), 1);
+    const pi = pagePool.indexOf(entry);
+    if (pi !== -1) pagePool.splice(pi, 1);
     console.log(`[SS] Removed dead browser, ${browsers.length} remaining`);
   }
 }
@@ -186,7 +193,7 @@ async function processQueue() {
   if (!browserReady) return;
   processing = true;
 
-  while (true) {
+  while (processing && enabled) {
     while (queue.length > 0 && enabled) {
       const batch = queue.splice(0, Math.min(concurrent, queue.length));
       await Promise.allSettled(batch.map((item) => screenshotDomain(item)));
@@ -196,9 +203,11 @@ async function processQueue() {
       backfillPending();
     }
 
-    processing = false;
-    if (queue.length === 0 || !enabled) break;
-    processing = true;
+    // Keep processing=true during check to prevent race
+    if (queue.length === 0 || !enabled) {
+      processing = false;
+      break;
+    }
   }
 }
 

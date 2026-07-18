@@ -220,7 +220,6 @@ export function markPending(id) {
 }
 
 export function deleteDomain(id) {
-  const domain = stmts.getDomainScreenshotPath.get(id);
   return stmts.deleteDomain.run(id);
 }
 

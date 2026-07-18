@@ -26,7 +26,7 @@ import { checkBlacklist, invalidateBlacklistCache } from "../blacklist.js";
 
 const router = Router();
 
-const MAX_LIMIT = 200;
+const MAX_LIMIT = 1000;
 
 function clampLimit(val) {
   return Math.min(Math.max(parseInt(val) || 50, 1), MAX_LIMIT);
