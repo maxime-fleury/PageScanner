@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PageScanner - Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg border-bottom border-secondary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <i class="bi bi-crosshair-2 text-success me-2"></i>PageScanner
+      </a>
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link active" href="/">Dashboard</a>
+        <a class="nav-link" href="/gallery.html">Gallery</a>
+        <a class="nav-link" href="/blacklist.html">Blacklist</a>
+        <a href="/api/domains/export/csv" class="btn btn-sm btn-outline-info ms-2" title="Export CSV">
+          <i class="bi bi-download"></i>
+        </a>
+        <button id="btn-reset" class="btn btn-sm btn-outline-danger ms-2" title="Reset database">
+          <i class="bi bi-arrow-repeat"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <!-- Top bar: Control + Stats -->
+    <div class="row g-3 mb-4 align-items-stretch">
+      <div class="col-md-3">
+        <div class="card bg-dark border-secondary h-100">
+          <div class="card-body d-flex flex-column justify-content-center align-items-center">
+            <div id="crawler-icon" class="mb-2 text-secondary"><i class="bi bi-radar fs-1"></i></div>
+            <h6 class="text-muted mb-2">Crawler</h6>
+            <button id="btn-toggle" class="btn btn-outline-success btn-lg px-4 toggle-btn">
+              <i class="bi bi-play-fill me-1"></i>Start
+            </button>
+            <small id="status-details" class="text-muted font-mono mt-2 text-center">4 CT logs ready</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card bg-dark border-secondary h-100">
+          <div class="card-body d-flex flex-column justify-content-center align-items-center">
+            <div id="ss-icon" class="mb-2 text-secondary"><i class="bi bi-camera fs-1"></i></div>
+            <h6 class="text-muted mb-2">Screenshotter</h6>
+            <button id="btn-ss-toggle" class="btn btn-outline-info btn-lg px-4 toggle-btn">
+              <i class="bi bi-play-fill me-1"></i>Start
+            </button>
+            <div class="d-flex align-items-center gap-2 mt-2">
+              <small class="text-muted font-mono" id="ss-details">0 in queue</small>
+              <div class="input-group input-group-sm" style="width:auto">
+                <span class="input-group-text bg-dark text-light border-secondary" style="font-size:0.7rem;padding:0.15rem 0.4rem">Threads</span>
+                <select id="ss-threads" class="form-select form-select-sm bg-dark text-light border-secondary" style="width:55px;font-size:0.75rem;padding:0.15rem 0.3rem">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="4">4</option>
+                  <option value="6">6</option>
+                  <option value="8" selected>8</option>
+                  <option value="10">10</option>
+                  <option value="12">12</option>
+                  <option value="16">16</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card bg-dark border-secondary h-100">
+          <div class="card-body text-center d-flex flex-column justify-content-center">
+            <div class="text-success mb-1"><i class="bi bi-hdd-stack"></i></div>
+            <h6 class="text-muted mb-1" style="font-size:0.75rem">Total</h6>
+            <h3 id="stat-total" class="mb-0 font-mono">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card bg-dark border-secondary h-100">
+          <div class="card-body text-center d-flex flex-column justify-content-center">
+            <div class="text-info mb-1"><i class="bi bi-camera"></i></div>
+            <h6 class="text-muted mb-1" style="font-size:0.75rem">Screenshotted</h6>
+            <h3 id="stat-screenshotted" class="mb-0 font-mono">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-1">
+        <div class="card bg-dark border-secondary h-100">
+          <div class="card-body text-center d-flex flex-column justify-content-center">
+            <div class="text-warning mb-1"><i class="bi bi-hourglass-split"></i></div>
+            <h6 class="text-muted mb-1" style="font-size:0.75rem">Pending</h6>
+            <h3 id="stat-pending" class="mb-0 font-mono">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-1">
+        <div class="card bg-dark border-secondary h-100">
+          <div class="card-body text-center d-flex flex-column justify-content-center">
+            <div class="text-danger mb-1"><i class="bi bi-shield-slash"></i></div>
+            <h6 class="text-muted mb-1" style="font-size:0.75rem">Blocked</h6>
+            <h3 id="stat-blacklisted" class="mb-0 font-mono">0</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card bg-dark border-secondary mb-4">
+      <div class="card-body py-2 px-3">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <h6 class="text-muted mb-0" style="font-size:0.8rem">Discoveries over time</h6>
+          <span id="live-counter" class="badge bg-success" style="display:none;font-size:0.7rem">
+            <i class="bi bi-broadcast"></i> LIVE
+          </span>
+        </div>
+        <div style="height:120px">
+          <canvas id="chart-discoveries"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Discoveries -->
+    <div class="card bg-dark border-secondary">
+      <div class="card-body">
+        <h6 class="card-title text-muted mb-3">Recent Discoveries</h6>
+        <div class="table-responsive">
+          <table class="table table-dark table-hover table-borderless mb-0">
+            <thead>
+              <tr>
+                <th>Domain</th>
+                <th>Source</th>
+                <th>Status</th>
+                <th>Discovered</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="recent-domains"></tbody>
+          </table>
+        </div>
+        <div id="no-domains" class="text-center text-muted py-5">
+          <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+          Start the crawler to discover domains
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>
