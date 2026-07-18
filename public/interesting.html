@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PageScanner - Interesting Discoveries</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg border-bottom border-secondary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <i class="bi bi-crosshair-2 text-accent me-2"></i>PageScanner
+      </a>
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="/">Dashboard</a>
+        <a class="nav-link" href="/gallery.html">Gallery</a>
+        <a class="nav-link" href="/blacklist.html">Blacklist</a>
+        <a class="nav-link active" href="/interesting.html">Discoveries</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <div class="stat-icon" style="color: var(--accent)"><i class="bi bi-gem fs-2"></i></div>
+      <div>
+        <h4 class="mb-0">Interesting Discoveries</h4>
+        <small class="text-muted">Load your domain CSV, filter out noise, and let AI find the gems</small>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Left column: config + tags -->
+      <div class="col-lg-5">
+        <!-- API Config -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h6 class="card-title text-muted mb-3">
+              <i class="bi bi-key me-2" style="color: var(--accent)"></i>OpenRouter API
+            </h6>
+            <div class="mb-3">
+              <label class="form-label small text-muted">API Key</label>
+              <div class="input-group">
+                <input type="password" id="api-key-input" class="form-control" placeholder="sk-or-v1-..." autocomplete="off">
+                <button id="btn-toggle-key-vis" class="btn btn-outline-secondary" type="button">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button id="btn-fetch-models" class="btn btn-accent" type="button" disabled>
+                  <i class="bi bi-arrow-clockwise me-1"></i>Load Models
+                </button>
+              </div>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small text-muted">Model</label>
+              <select id="model-select" class="form-select" disabled>
+                <option value="">— enter API key first —</option>
+              </select>
+            </div>
+            <div id="pricing-display" class="small text-muted mb-2" style="display:none">
+              <span id="pricing-prompt"></span> prompt · <span id="pricing-completion"></span> completion
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div id="api-status" class="small text-muted"></div>
+              <div id="credits-display" class="small text-muted" style="display:none">
+                <i class="bi bi-wallet2 me-1"></i><span id="credits-remaining"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exclusion Tags -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h6 class="card-title text-muted mb-3">
+              <i class="bi bi-funnel me-2" style="color: var(--warning)"></i>Exclusion Tags
+            </h6>
+            <p class="small text-muted mb-2">Rows containing these words in domain or title will be excluded before AI analysis.</p>
+            <form id="add-tag-form" class="input-group mb-3">
+              <input type="text" id="tag-input" class="form-control" placeholder="e.g. panel, cpanel, nginx" autocomplete="off">
+              <button type="submit" class="btn btn-outline-warning">
+                <i class="bi bi-plus-lg me-1"></i>Add
+              </button>
+            </form>
+            <div id="tags-list" class="d-flex flex-wrap gap-2 mb-2"></div>
+            <div id="no-tags" class="text-muted text-center py-2 small">No exclusion tags</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column: data + analysis -->
+      <div class="col-lg-7">
+        <!-- Data Source -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h6 class="card-title text-muted mb-3">
+              <i class="bi bi-table me-2" style="color: var(--info)"></i>Data Source
+            </h6>
+            <div class="d-flex gap-2 align-items-center flex-wrap mb-3">
+              <button id="btn-load-db" class="btn btn-accent">
+                <i class="bi bi-database me-1"></i>Load from Database
+              </button>
+              <div class="text-muted small">or</div>
+              <label class="btn btn-outline-secondary mb-0">
+                <i class="bi bi-upload me-1"></i>Upload CSV
+                <input type="file" id="csv-file-input" accept=".csv" style="display:none">
+              </label>
+              <button id="btn-clear-data" class="btn btn-outline-danger btn-sm ms-auto" disabled>
+                <i class="bi bi-trash me-1"></i>Clear
+              </button>
+            </div>
+            <div id="data-summary" class="small text-muted" style="display:none">
+              <span id="summary-loaded">0</span> loaded ·
+              <span id="summary-after">0</span> after filtering ·
+              <span id="summary-excluded" class="text-warning">0</span> excluded
+              <span id="summary-pages" class="ms-2"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Table -->
+        <div class="card mb-4" id="preview-card" style="display:none">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark table-borderless mb-0">
+                <thead>
+                  <tr>
+                    <th style="width:30%">Domain</th>
+                    <th style="width:35%">Title</th>
+                    <th style="width:12%">Status</th>
+                    <th style="width:13%">Source</th>
+                    <th style="width:10%">BL</th>
+                  </tr>
+                </thead>
+                <tbody id="preview-tbody"></tbody>
+              </table>
+            </div>
+            <div id="preview-empty" class="text-center text-muted py-4 small" style="display:none">
+              <i class="bi bi-inbox fs-4 d-block mb-1"></i>
+              No rows match after filtering
+            </div>
+            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top border-secondary" id="preview-pagination" style="display:none">
+              <button id="btn-prev-page" class="btn btn-sm btn-outline-secondary" disabled>
+                <i class="bi bi-chevron-left"></i> Prev
+              </button>
+              <small class="text-muted" id="page-info"></small>
+              <button id="btn-next-page" class="btn btn-sm btn-outline-secondary" disabled>
+                Next <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Analysis -->
+        <div class="card">
+          <div class="card-body">
+            <h6 class="card-title text-muted mb-3">
+              <i class="bi bi-stars me-2" style="color: var(--accent)"></i>AI Analysis
+            </h6>
+            <div class="d-flex gap-2 align-items-center mb-3 flex-wrap">
+              <button id="btn-analyze" class="btn btn-accent btn-lg" disabled>
+                <i class="bi bi-send me-1"></i>Analyze with AI
+              </button>
+              <button id="btn-suggest-exclusions" class="btn btn-outline-warning btn-lg" disabled>
+                <i class="bi bi-funnel me-1"></i>Suggest Exclusions
+              </button>
+              <div class="small text-muted" id="analyze-info">Load data to begin</div>
+            </div>
+            <div id="analyze-spinner" style="display:none" class="text-center py-4">
+              <div class="spinner-border mb-2" role="status"></div>
+              <div class="small text-muted">Analyzing domains with AI...</div>
+            </div>
+            <div id="analyze-cost" class="small text-muted mb-2" style="display:none">
+              <i class="bi bi-coin me-1"></i>Request cost: <span id="request-cost"></span>
+            </div>
+            <div id="session-spend" class="small text-muted mb-2" style="display:none">
+              <i class="bi bi-piggy-bank me-1"></i>Session spend: <span id="session-cost"></span>
+              <button id="btn-reset-session" class="btn btn-sm btn-outline-secondary ms-2 py-0" style="font-size:0.7rem">Reset</button>
+            </div>
+            <div id="results-area" style="display:none">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-accent fw-semibold">Findings</small>
+                <button id="btn-copy-results" class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-clipboard me-1"></i>Copy
+                </button>
+              </div>
+              <div id="results-content" class="p-3 rounded" style="background:var(--bg-body);border:1px solid var(--border);white-space:pre-wrap;font-size:0.85rem;line-height:1.6;max-height:500px;overflow-y:auto"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .btn-accent {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      transition: all 0.2s ease;
+    }
+    .btn-accent:hover {
+      background: #7c3aed;
+      border-color: #7c3aed;
+      color: #fff;
+    }
+    .btn-accent:disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    #preview-tbody td {
+      font-size: 0.78rem;
+      padding: 0.4rem 0.6rem;
+    }
+    #preview-tbody td.domain-cell {
+      font-family: var(--font-mono);
+      color: var(--accent-text);
+      max-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #preview-tbody td.title-cell {
+      max-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-muted);
+    }
+    #preview-tbody tr.excluded {
+      opacity: 0.25;
+      text-decoration: line-through;
+    }
+    #results-content strong {
+      color: var(--accent-text);
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/interesting.js"></script>
+</body>
+</html>

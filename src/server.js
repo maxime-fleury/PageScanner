@@ -30,6 +30,7 @@ server.listen(PORT, () => {
   ║  Dashboard:  http://localhost:${portStr}${" ".repeat(Math.max(0, w - 32 - portStr.length))}║
   ║  Gallery:    http://localhost:${portStr}/gallery.html${" ".repeat(Math.max(0, w - 38 - portStr.length))}║
   ║  Blacklist:  http://localhost:${portStr}/blacklist.html${" ".repeat(Math.max(0, w - 39 - portStr.length))}║
+  ║  Discoveries: http://localhost:${portStr}/interesting.html${" ".repeat(Math.max(0, w - 40 - portStr.length))}║
   ╚${"═".repeat(w)}╝
   `);
 });

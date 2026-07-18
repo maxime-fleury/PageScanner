@@ -72,12 +72,18 @@ const stmts = {
   listDomainsByStatus: db.prepare(
     "SELECT * FROM domains WHERE status = ? ORDER BY discovered_at DESC LIMIT ? OFFSET ?"
   ),
+  listDomainsScreenshottedClean: db.prepare(
+    "SELECT * FROM domains WHERE status = 'screenshot' AND blacklisted = 0 ORDER BY discovered_at DESC LIMIT ? OFFSET ?"
+  ),
   countDomains: db.prepare("SELECT COUNT(*) as count FROM domains"),
   countDomainsFiltered: db.prepare(
     "SELECT COUNT(*) as count FROM domains WHERE blacklisted = ?"
   ),
   countDomainsByStatus: db.prepare(
     "SELECT COUNT(*) as count FROM domains WHERE status = ?"
+  ),
+  countDomainsScreenshottedClean: db.prepare(
+    "SELECT COUNT(*) as count FROM domains WHERE status = 'screenshot' AND blacklisted = 0"
   ),
   updateScreenshot: db.prepare(
     "UPDATE domains SET screenshot_path = ?, page_title = ?, page_content = ?, status = 'screenshot', blacklisted = ?, blacklist_reason = ?, screenshot_at = datetime('now') WHERE id = ?"
@@ -156,6 +162,8 @@ export function listDomains(limit = 50, offset = 0, filter = null) {
     return stmts.listDomainsFiltered.all(1, limit, offset);
   } else if (filter === "shown") {
     return stmts.listDomainsFiltered.all(0, limit, offset);
+  } else if (filter === "screenshotted_clean") {
+    return stmts.listDomainsScreenshottedClean.all(limit, offset);
   } else if (filter === "screenshotted") {
     return stmts.listDomainsByStatus.all("screenshot", limit, offset);
   } else if (filter === "pending") {
@@ -169,6 +177,8 @@ export function countDomains(filter = null) {
     return stmts.countDomainsFiltered.get(1).count;
   } else if (filter === "shown") {
     return stmts.countDomainsFiltered.get(0).count;
+  } else if (filter === "screenshotted_clean") {
+    return stmts.countDomainsScreenshottedClean.get().count;
   } else if (filter === "screenshotted") {
     return stmts.countDomainsByStatus.get("screenshot").count;
   } else if (filter === "pending") {

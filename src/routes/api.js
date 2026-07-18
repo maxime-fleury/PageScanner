@@ -204,4 +204,83 @@ router.post("/reset", async (req, res) => {
   res.json({ reset: true });
 });
 
+// OpenRouter proxy
+router.get("/openrouter/models", async (req, res) => {
+  try {
+    const key = req.query.key;
+    if (!key) return res.status(400).json({ error: "API key required" });
+
+    const r = await fetch("https://openrouter.ai/api/v1/models", {
+      headers: { Authorization: `Bearer ${key}` },
+    });
+    if (!r.ok) return res.status(r.status).json({ error: `OpenRouter returned ${r.status}` });
+
+    let raw;
+    try { raw = await r.json(); } catch { return res.status(502).json({ error: "OpenRouter returned non-JSON response" }); }
+    const data = raw;
+    const models = (data.data || data.models || []).map((m) => ({
+      id: m.id,
+      name: m.name || m.id,
+      pricing: m.pricing ? {
+        prompt: parseFloat(m.pricing.prompt) || 0,
+        completion: parseFloat(m.pricing.completion) || 0,
+      } : null,
+    })).sort((a, b) => a.name.localeCompare(b.name));
+
+    res.json({ models });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get("/openrouter/credits", async (req, res) => {
+  try {
+    const key = req.query.key;
+    if (!key) return res.status(400).json({ error: "API key required" });
+
+    const r = await fetch("https://openrouter.ai/api/v1/auth/key", {
+      headers: { Authorization: `Bearer ${key}` },
+    });
+    if (!r.ok) return res.status(r.status).json({ error: `OpenRouter returned ${r.status}` });
+
+    let data;
+    try { data = await r.json(); } catch { return res.status(502).json({ error: "OpenRouter returned non-JSON response" }); }
+    res.json({
+      credits: data.data?.credits ?? null,
+      usage: data.data?.usage ?? null,
+      limit: data.data?.limit ?? null,
+      label: data.data?.label ?? null,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post("/openrouter/chat", async (req, res) => {
+  try {
+    const { apiKey, model, messages } = req.body;
+    if (!apiKey) return res.status(400).json({ error: "API key required" });
+    if (!model) return res.status(400).json({ error: "Model required" });
+    if (!messages || !Array.isArray(messages)) return res.status(400).json({ error: "Messages required" });
+
+    const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost:3000",
+        "X-Title": "PageScanner",
+      },
+      body: JSON.stringify({ model, messages, max_tokens: 4096 }),
+    });
+
+    const data = await r.json();
+    if (!r.ok) return res.status(r.status).json({ error: data.error?.message || `OpenRouter returned ${r.status}` });
+
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default router;

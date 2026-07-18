@@ -19,6 +19,7 @@
         <a class="nav-link" href="/">Dashboard</a>
         <a class="nav-link active" href="/gallery.html">Gallery</a>
         <a class="nav-link" href="/blacklist.html">Blacklist</a>
+        <a class="nav-link" href="/interesting.html">Discoveries</a>
       </div>
     </div>
   </nav>
@@ -29,6 +30,7 @@
       <div class="d-flex gap-2 align-items-center">
         <select id="filter-select" class="form-select form-select-sm bg-dark text-light border-secondary" style="width:auto">
           <option value="">All domains</option>
+          <option value="screenshotted_clean">Screenshotted &amp; Clean</option>
           <option value="screenshotted">Screenshotted only</option>
           <option value="pending">Pending only</option>
           <option value="shown">Shown (not blacklisted)</option>
@@ -81,7 +83,13 @@
         </div>
         <div class="modal-footer border-secondary d-flex justify-content-between">
           <div class="text-muted small font-mono" id="lb-meta"></div>
-          <div class="d-flex gap-2">
+          <div class="d-flex gap-2 align-items-center">
+            <div class="input-group input-group-sm" style="width:220px">
+              <input type="text" id="lb-title-input" class="form-control bg-dark text-light border-secondary" style="font-size:0.75rem" placeholder="Title to blacklist">
+              <button id="lb-block-title" class="btn btn-sm btn-outline-warning" title="Add title as blacklist keyword">
+                <i class="bi bi-shield-slash"></i> Block
+              </button>
+            </div>
             <button id="lb-toggle-bl" class="btn btn-sm btn-outline-warning">
               <i class="bi bi-shield-slash me-1"></i>Blacklist
             </button>

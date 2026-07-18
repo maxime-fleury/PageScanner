@@ -35,7 +35,8 @@ function timeAgo(dateStr) {
 
 function buildApiUrl() {
   let url = `/api/domains?limit=${PAGE_SIZE}&offset=${currentPage * PAGE_SIZE}`;
-  if (currentFilter === "screenshotted") url += "&filter=screenshotted";
+  if (currentFilter === "screenshotted_clean") url += "&filter=screenshotted_clean";
+  else if (currentFilter === "screenshotted") url += "&filter=screenshotted";
   else if (currentFilter === "pending") url += "&filter=pending";
   else if (currentFilter === "blacklisted") url += "&filter=blacklisted";
   else if (currentFilter === "shown") url += "&filter=shown";
@@ -122,6 +123,56 @@ function resetGallery() {
   loadGalleryPage();
 }
 
+async function reloadGalleryKeepScroll() {
+  const scrollY = window.scrollY;
+  const pagesLoaded = currentPage;
+  const totalNeeded = (pagesLoaded + 1) * PAGE_SIZE;
+
+  currentPage = 0;
+  noMoreData = false;
+  loading = true;
+  document.getElementById("gallery-grid").innerHTML = "";
+
+  let url = `/api/domains?limit=${totalNeeded}&offset=0`;
+  if (currentFilter === "screenshotted_clean") url += "&filter=screenshotted_clean";
+  else if (currentFilter === "screenshotted") url += "&filter=screenshotted";
+  else if (currentFilter === "pending") url += "&filter=pending";
+  else if (currentFilter === "blacklisted") url += "&filter=blacklisted";
+  else if (currentFilter === "shown") url += "&filter=shown";
+
+  const sentinel = document.getElementById("scroll-sentinel");
+
+  try {
+    const data = await fetchJSON(url);
+    const grid = document.getElementById("gallery-grid");
+    const noGallery = document.getElementById("no-gallery");
+
+    if (data.domains.length === 0) {
+      noGallery.style.display = "block";
+      sentinel.style.display = "none";
+      noMoreData = true;
+    } else {
+      noGallery.style.display = "none";
+      for (const d of data.domains) {
+        grid.appendChild(renderCard(d));
+      }
+    }
+
+    if (data.domains.length < totalNeeded) {
+      noMoreData = true;
+      sentinel.style.display = "none";
+    } else {
+      currentPage = pagesLoaded + 1;
+      sentinel.style.display = "block";
+    }
+  } catch (e) {
+    console.error("Failed to reload gallery:", e);
+  }
+
+  loading = false;
+  window.scrollTo(0, scrollY);
+}
+
 function openLightbox(domain) {
   currentDomain = domain;
 
@@ -129,6 +180,10 @@ function openLightbox(domain) {
   document.getElementById("lb-title").textContent = domain.page_title || "No title";
   document.getElementById("lb-meta").textContent =
     `Source: ${domain.source} | Found: ${timeAgo(domain.discovered_at)} | Status: ${domain.status}`;
+
+  // Populate title input for blacklisting
+  const titleInput = document.getElementById("lb-title-input");
+  titleInput.value = domain.page_title || "";
 
   const badge = document.getElementById("lb-badge");
   if (domain.blacklisted) {
@@ -198,7 +253,34 @@ document.getElementById("lb-toggle-bl").addEventListener("click", async () => {
   }
 
   lightboxBootstrap.hide();
-  resetGallery();
+  reloadGalleryKeepScroll();
+});
+
+async function blockTitle() {
+  const input = document.getElementById("lb-title-input");
+  const text = input.value.trim();
+  if (!text) return;
+
+  // Add the title text as a blacklist keyword
+  await fetchJSON("/api/blacklist", {
+    method: "POST",
+    body: JSON.stringify({ keyword: text }),
+  });
+
+  // Re-check all domains so blocked cards are masked on reload
+  await fetchJSON("/api/blacklist/recheck-all", { method: "POST" });
+
+  lightboxBootstrap.hide();
+  reloadGalleryKeepScroll();
+}
+
+document.getElementById("lb-block-title").addEventListener("click", blockTitle);
+
+document.getElementById("lb-title-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    blockTitle();
+  }
 });
 
 // Check URL params for direct domain link
